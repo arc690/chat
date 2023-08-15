@@ -119,15 +119,16 @@
       <h1>MathGPT</h1>
     </div>
     <div class="chat-container" id="chat-container">
-      <div class="message">
-        <div class="avatar"></div>
-        <div class="message-text">Hello! I'm MathGPT. How can I help you with your math problem?</div>
-      </div>
-      
-      <div class="message">
-        <div class="avatar"></div>
-        <div class="message-text">For example, you can type: "666^65/88*77/78*77.88*76655" and please type numbers only!</div>
-      </div>
+       
+        <div class="message">
+          <div class="avatar"></div>
+          <div class="message-text">Hello! I'm MathGPT. How can I help you with your math problem? 😊</div>
+        </div>
+        
+        <div class="message">
+          <div class="avatar"></div>
+          <div class="message-text">For example, you can type: "666^65/88*77/78*77.88*76655" and please type numbers only! 👍</div>
+        </div>
       <!-- Other chat messages can be added here -->
     </div>
     <div class="user-input">
@@ -136,45 +137,81 @@
     </div>
   </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.5.1/math.min.js"></script>
-
 <script>
-  function sendMessage() {
-    const userInput = document.getElementById('math-input').value;
-    addMessage(userInput, 'user');
+    function sendMessage() {
+      const userInput = document.getElementById('math-input').value;
+      addMessage(userInput, 'user');
+
+      const solution = solveMathProblem(userInput);
+      addMessage(solution.answer, 'ai');
+      addMessage(solution.explanation, 'ai');
+      addEmojis();
+    }
+
+    function solveMathProblem(userInput) {
+      try {
+        const expression = userInput.replace(/Solve for x:/i, ''); // Remove the "Solve for x:" part
+        const result = math.evaluate(expression, { x: 0 }); // Evaluate the expression
+
+        const explanation = generateExplanation(expression, result);
+        return {
+          answer: `The solution answer is: ${result}`,
+          explanation: explanation
+        };
+      } catch (error) {
+        return {
+          answer: "I'm sorry, I couldn't solve the math problem.",
+          explanation: ""
+        };
+      }
+    }
+
+    function generateExplanation(expression, result) {
+      const explanationTemplates = [
+        `Sure! Here's how I solved it: ${expression} = ${result}.<br><br>`,
+        `To solve this equation, follow these steps:<br>`,
+        `Step 1: Rearrange the equation to isolate 'x'.<br>`,
+        `Step 2: Substitute the value of 'x' back into the original equation to verify.<br>`
+      ];
+      const examples = [
+        `For example:`,
+        `Given equation: ${expression}`,
+        `Step 1: Divide both sides by the coefficient of 'x'.`,
+        `Step 2: Substitute the value of 'x' into the original equation to verify.`
+        // Add more steps and examples as needed
+      ];
+
+      const randomExplanation = explanationTemplates[Math.floor(Math.random() * explanationTemplates.length)];
+      const randomExample = examples.join('<br>');
+
+      return randomExplanation + randomExample;
+    }
+
+    function addMessage(message, sender) {
+      const chatContainer = document.getElementById('chat-container');
+      const newMessage = document.createElement('div');
+      newMessage.classList.add('message');
+      if (sender === 'ai') {
+        newMessage.innerHTML = `
+          <div class="avatar"></div>
+          <div class="message-text">${message}</div>
+        `;
+      } else if (sender === 'user') {
+        newMessage.innerHTML = `
+          <div class="user-avatar"></div>
+          <div class="message-text">${message}</div>
+        `;
+      }
+      chatContainer.appendChild(newMessage);
+      chatContainer.scrollTop = chatContainer.scrollHeight; // Scroll to bottom
+    }
     
-    const solution = solveMathProblem(userInput);
-    addMessage(solution, 'ai');
-  }
 
-  function solveMathProblem(userInput) {
-    try {
-      const expression = userInput.replace(/Solve for x:/i, ''); // Remove the "Solve for x:" part
-      const result = math.evaluate(expression, { x: 0 }); // Evaluate the expression
-
-      return `The solution answer is = ${result}`;
-    } catch (error) {
-      return "I'm sorry, I couldn't solve the math problem.";
-    }
-  }
-
-  function addMessage(message, sender) {
-    const chatContainer = document.querySelector('.chat-container');
-    const newMessage = document.createElement('div');
-    newMessage.classList.add('message');
-    if (sender === 'ai') {
-      newMessage.innerHTML = `
-        <div class="avatar"></div>
-        <div class="message-text">${message}</div>
-      `;
-    } else if (sender === 'user') {
-      newMessage.innerHTML = `
-        <div class="user-avatar"></div>
-        <div class="message-text">${message}</div>
-      `;
-    }
-    chatContainer.appendChild(newMessage);
-    chatContainer.scrollTop = chatContainer.scrollHeight; // Scroll to bottom
-  }
-</script>
+    function addEmojis() {
+        const emojis = ['😀', '👍', '🤔', '😊', '👏', '😎', '❤️', '🎉', '🙌', '🚀'];
+        const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+        addMessage(randomEmoji, 'ai');
+      }
+  </script>
 </body>
 </html>
