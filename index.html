@@ -141,16 +141,31 @@
   </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.5.1/math.min.js"></script>
 <script>
-    function sendMessage() {
-      const userInput = document.getElementById('math-input').value;
-      addMessage(userInput, 'user');
-
-      const solution = solveMathProblem(userInput);
-      addMessage(solution.answer, 'ai');
-      addMessage(solution.explanation, 'ai');
-      addEmojis();
-    }
-
+    document.getElementById('math-input').addEventListener('keyup', function(event) {
+        if (event.key === 'Enter') {
+          sendMessage();
+        }
+      });
+      
+      function sendMessage() {
+        const userInput = document.getElementById('math-input').value;
+        if (userInput.trim() !== '') {
+          addMessage(userInput, 'user');
+          document.getElementById('math-input').value = ''; // Clear the input
+          setTimeout(() => {
+            const solution = solveMathProblem(userInput);
+            addMessage(solution.answer, 'ai');
+            addMessage(solution.explanation, 'ai');
+            addEmojis();
+          }, 1000); // Simulate delay before AI response
+        }
+      }
+      
+      
+      
+      
+      
+      
     function solveMathProblem(userInput) {
       try {
         const expression = userInput.replace(/Solve for x:/i, ''); // Remove the "Solve for x:" part
@@ -168,42 +183,69 @@
         };
       }
     }
-    function generateExplanation(expression, result) {
-        const explanationTemplates = [
-          `Sure! Here's how I solved it: ${expression} = ${result}.<br><br>`,
-          `To solve this equation, follow these steps:<br>`,
-          `Step 1: Rearrange the equation to isolate 'x'.<br>`,
-          `Step 2: Substitute the value of 'x' back into the original equation to verify.<br>`,
-          `To solve this problem, use the following steps:<br>`,
-          `Step 1: Apply the appropriate operation to both sides of the equation.<br>`,
-          `Step 2: Simplify the equation by combining like terms.<br>`,
-          `Step 3: Isolate the variable on one side of the equation.<br>`,
-          `Step 4: Verify the solution by substituting it back into the original equation.<br>`
-        ];
-        const examples = [
-          `For example:`,
-          `Given equation: ${expression}`,
-          `Step 1: Divide both sides by the coefficient of 'x'.`,
-          `Step 2: Substitute the value of 'x' into the original equation to verify.`,
-          `For instance:`,
-          `Starting equation: ${expression}`,
-          `Step 1: Add or subtract terms to isolate 'x' on one side.`,
-          `Step 2: Divide both sides by the coefficient of 'x'.`,
-          `For illustration:`,
-          `Given equation: ${expression}`,
-          `Step 1: Apply the distributive property to simplify.`,
-          `Step 2: Combine like terms on both sides of the equation.`,
-          `Step 3: Isolate 'x' on one side by performing inverse operations.`
-          // Add more explanations and examples as needed
-        ];
-      
-        const randomExplanation = explanationTemplates[Math.floor(Math.random() * explanationTemplates.length)];
-        const randomExample = examples.join('<br>');
-      
-        return randomExplanation + randomExample;
-      }
-      
 
+    function generateExplanation(expression, result) {
+      const explanationTemplates = [
+        `Sure! Here's how I solved it: ${expression} = ${result}.<br><br>`,
+        `To solve this equation, follow these steps:<br>`,
+        `Step 1: Rearrange the equation to isolate 'x'.<br>`,
+        `Step 2: Substitute the value of 'x' back into the original equation to verify.<br>`,
+        `To solve this problem, use the following steps:<br>`,
+        `Step 1: Apply the appropriate operation to both sides of the equation.<br>`,
+        `Step 2: Simplify the equation by combining like terms.<br>`,
+        `Step 3: Isolate the variable on one side of the equation.<br>`,
+        `Step 4: Verify the solution by substituting it back into the original equation.<br>`
+        // Add more steps and examples as needed
+      ];
+      const largeExplanation = [
+        `This is a more complex equation, so let's break it down step by step:<br>`,
+        `Step 1: Distribute any constants or coefficients to terms within parentheses.<br>`,
+        `Step 2: Combine like terms on both sides of the equation to simplify.<br>`,
+        `Step 3: Move all 'x' terms to one side and constants to the other side.<br>`,
+        `Step 4: Factor if possible to simplify further.<br>`,
+        `Step 5: Isolate 'x' by dividing both sides of the equation.<br>`,
+        `Step 6: Substitute the calculated value of 'x' back into the equation to verify.<br>`
+        // Add more detailed steps for larger equations
+      ];
+      const basicExplanation = [
+        `This equation involves basic arithmetic operations, making it simpler to solve:<br>`,
+        `Step 1: Perform addition or subtraction on both sides to isolate 'x'.<br>`,
+        `Step 2: If needed, perform multiplication or division to further isolate 'x'.<br>`,
+        `Step 3: Substitute the calculated value of 'x' back into the equation to verify.<br>`
+        // Add more basic arithmetic explanation steps if necessary
+      ];
+
+      let explanation = '';
+
+      if (expression.length > 20) {
+        explanation = largeExplanation.join('');
+      } else if (expression.includes('+') || expression.includes('-') || expression.includes('*') || expression.includes('/')) {
+        explanation = basicExplanation.join('');
+      } else {
+        explanation = explanationTemplates[Math.floor(Math.random() * explanationTemplates.length)];
+      }
+
+      // Add more specific explanations and examples based on user input
+      if (expression.includes('^')) {
+        explanation += `This equation involves exponentiation. To solve it, apply the power rule:<br>`;
+        // Add example and steps for solving exponentiation
+      }
+
+      // Add more specific explanations and examples based on other operators and equation types
+      // ...
+
+      const examples = [
+        `For example:`,
+        `Given equation: ${expression}`,
+        `Step 1: Divide both sides by the coefficient of 'x'.`,
+        `Step 2: Substitute the value of 'x' into the original equation to verify.`
+        // Add more steps and examples as needed
+      ];
+
+      const randomExample = examples.join('<br>');
+
+      return explanation + randomExample;
+    }
 
     function addMessage(message, sender) {
       const chatContainer = document.getElementById('chat-container');
@@ -223,13 +265,12 @@
       chatContainer.appendChild(newMessage);
       chatContainer.scrollTop = chatContainer.scrollHeight; // Scroll to bottom
     }
-    
 
     function addEmojis() {
-        const emojis = ['😀', '👍', '🤔', '😊', '👏', '😎', '❤️', '🎉', '🙌', '🚀'];
-        const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
-        addMessage(randomEmoji, 'ai');
-      }
+      const emojis = ['😀', '👍', '🤔', '😊', '👏', '😎', '❤️', '🎉', '🙌', '🚀', '📚', '💡', '🔍', '⚡️'];
+      const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+      addMessage(randomEmoji, 'ai');
+    }
   </script>
 </body>
 </html>
